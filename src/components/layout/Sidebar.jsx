@@ -17,7 +17,6 @@ import {
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { user } = useSelector(state => state.auth);
-
   const getMenuItems = () => {
     const baseItems = [
       { name: 'Dashboard', href: '/dashboard', icon: Home },
@@ -26,7 +25,6 @@ const Sidebar = ({ isOpen, onClose }) => {
       // { name: 'Locations', href: '/locations', icon: MapPin },
       { name: 'Location Mgmt', href: '/location-management', icon: MapPin },
     ];
-
     const vendorItems = [
       { name: 'Dashboard', href: '/dashboard', icon: Home },
       { name: 'Customers', href: '/users', icon: Users },

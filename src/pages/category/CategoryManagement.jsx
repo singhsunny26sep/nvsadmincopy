@@ -5,8 +5,10 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import CategoryForm from "./CategoryForm";
 import Table from "../../components/models/Table";
 import { categoriesAPI } from "../../components/api/api";
+import { useAuth } from "../../hooks/useAuth";
 
 const CategoryManagement = () => {
+  const { user } = useAuth();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
@@ -86,7 +88,7 @@ const CategoryManagement = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await categoriesAPI.getCategories({ limit: 1000 });
+      const response = await categoriesAPI.getCategories({ limit: 1000, userId: user?.id || user?._id });
 
       console.log("API Response:", response.data);
 

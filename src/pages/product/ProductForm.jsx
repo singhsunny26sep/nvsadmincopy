@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, ChevronDown } from 'lucide-react';
 import { subcategoriesAPI, categoriesAPI } from '../../components/api/api';
+import { useAuth } from '../../hooks/useAuth';
 
 const ProductForm = ({ 
   product = null, 
@@ -8,6 +9,7 @@ const ProductForm = ({
   onCancel,
   title = "Add New Product"
 }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: product?.name || '',
     description: product?.description || '',
@@ -38,8 +40,8 @@ const ProductForm = ({
     try {
       setLoading(true);
       const [subResponse, catResponse] = await Promise.all([
-        subcategoriesAPI.getSubcategories({ limit: 1000 }),
-        categoriesAPI.getCategories({ limit: 1000 })
+        subcategoriesAPI.getSubcategories({ limit: 1000, userId: user?.id || user?._id }),
+        categoriesAPI.getCategories({ limit: 1000, userId: user?.id || user?._id })
       ]);
 
       let subcategoriesData = [];

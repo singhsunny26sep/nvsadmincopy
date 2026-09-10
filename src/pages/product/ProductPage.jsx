@@ -3,8 +3,10 @@ import { Plus, Edit, Trash2, Package, MapPin } from 'lucide-react';
 import ProductForm from './ProductForm';
 import Table from '../../components/models/Table';
 import { categoriesAPI, subcategoriesAPI, productsAPI, locationsAPI } from '../../components/api/api';
+import { useAuth } from '../../hooks/useAuth';
 
 const ProductManagement = () => {
+  const { user } = useAuth();
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -33,7 +35,7 @@ const ProductManagement = () => {
       setError(null);
 
       // Fetch categories
-      const categoriesResponse = await categoriesAPI.getCategories({ limit: 1000 });
+      const categoriesResponse = await categoriesAPI.getCategories({ limit: 1000, userId: user?.id || user?._id });
       let categoriesData = categoriesResponse?.data?.data?.data || [];
       if (!Array.isArray(categoriesData)) {
         categoriesData = [];
@@ -41,7 +43,7 @@ const ProductManagement = () => {
       setCategories(categoriesData);
 
       // Fetch subcategories
-      const subcategoriesResponse = await subcategoriesAPI.getSubcategories({ limit: 1000 });
+      const subcategoriesResponse = await subcategoriesAPI.getSubcategories({ limit: 1000, userId: user?.id || user?._id });
       let subcategoriesData = subcategoriesResponse?.data?.data?.data || [];
       if (!Array.isArray(subcategoriesData)) {
         subcategoriesData = [];
@@ -49,7 +51,7 @@ const ProductManagement = () => {
       setSubcategories(subcategoriesData);
 
       // Fetch products with pagination
-      const productsResponse = await productsAPI.getProducts({ page: currentPage, limit: 10 });
+      const productsResponse = await productsAPI.getProducts({ page: currentPage, limit: 10, userId: user?.id || user?._id });
       let productsData = productsResponse?.data?.data?.data || [];
       if (!Array.isArray(productsData)) {
         productsData = [];

@@ -5,8 +5,10 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import { SubCategoryForm } from "./SubCategoryForm";
 import Table from "../../components/models/Table";
 import { categoriesAPI, subcategoriesAPI } from "../../components/api/api";
+import { useAuth } from "../../hooks/useAuth";
 
 const SubCategoryManagement = () => {
+  const { user } = useAuth();
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,7 +76,7 @@ const SubCategoryManagement = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await categoriesAPI.getCategories({ limit: 1000 });
+      const response = await categoriesAPI.getCategories({ limit: 1000, userId: user?.id || user?._id });
 
       let categoriesData = [];
       if (response.data.data?.data && Array.isArray(response.data.data.data)) {
@@ -95,7 +97,7 @@ const SubCategoryManagement = () => {
   const fetchSubcategories = async () => {
     try {
       setLoading(true);
-      const response = await subcategoriesAPI.getSubcategories({ limit: 1000 });
+      const response = await subcategoriesAPI.getSubcategories({ limit: 1000, userId: user?.id || user?._id });
 
       let subcategoriesData = [];
       if (response.data.data?.data && Array.isArray(response.data.data.data)) {
