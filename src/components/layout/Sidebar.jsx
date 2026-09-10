@@ -23,7 +23,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       { name: 'Dashboard', href: '/dashboard', icon: Home },
       { name: 'Customers', href: '/users', icon: Users },
       { name: 'Vendor Register', href: '/vendor-register', icon: UserPlus },
-      { name: 'Locations', href: '/locations', icon: MapPin },
+      // { name: 'Locations', href: '/locations', icon: MapPin },
       { name: 'Location Mgmt', href: '/location-management', icon: MapPin },
     ];
 
