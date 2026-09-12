@@ -26,7 +26,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       { name: 'Location Mgmt', href: '/location-management', icon: MapPin },
     ];
     const vendorItems = [
-      { name: 'Dashboard', href: '/dashboard', icon: Home },
+
       { name: 'Customers', href: '/users', icon: Users },
       { name: 'Products', href: '/products', icon: FileText },
       { name: 'Categories', href: '/category', icon: Settings },
@@ -51,7 +51,7 @@ const Sidebar = ({ isOpen, onClose }) => {
        support_admin: [
          { name: 'Products', href: '/products', icon: FileText },
          { name: 'Banner', href: '/banner', icon: FileText },
-         { name: 'offers', href: '/offers', icon: FileText },
+
          { name: 'Settings', href: '/settings', icon: Settings },
          { name: 'Notifications', href: '/notifications', icon: FileText },
          { name: 'WhatsApp Bulk', href: '/whatsapp-bulk', icon: MessageSquare },
