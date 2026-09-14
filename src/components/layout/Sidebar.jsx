@@ -50,6 +50,11 @@ const Sidebar = ({ isOpen, onClose }) => {
         { name: 'Reports', href: '/reports', icon: FileText },
         { name: 'Settings', href: '/settings', icon: Settings },
       ],
+      admin: [
+        { name: 'Customers', href: '/users', icon: Users },
+        { name: 'Reports', href: '/reports', icon: FileText },
+        { name: 'Settings', href: '/settings', icon: Settings },
+      ],
       zone_admin: [
         { name: 'Customers', href: '/users', icon: Users },
         { name: 'Zone Management', href: '/zone-management', icon: MapPin },
