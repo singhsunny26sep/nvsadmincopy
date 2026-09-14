@@ -9,6 +9,7 @@ import "./App.css";
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const VendorRegister = lazy(() => import("./pages/VendorRegister"));
 const VendorDetails = lazy(() => import("./pages/VendorDetails"));
+const VendorBranches = lazy(() => import("./pages/VendorBranches"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const UsersPage = lazy(() => import("./pages/UsersPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
@@ -38,6 +39,7 @@ function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/vendor-register" element={<VendorRegister />} />
               <Route path="/vendor-details" element={<VendorDetails />} />
+              <Route path="/vendor-branches" element={<VendorBranches />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/category" element={<CategoryManagement />} />
               <Route path="/subcategories" element={<SubCategoryManagement />} />

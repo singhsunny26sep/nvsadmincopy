@@ -12,7 +12,8 @@ import {
   Activity,
   MessageSquare,
   UserPlus,
-  Store
+  Store,
+  Building2
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -24,6 +25,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       { name: 'Customers', href: '/users', icon: Users },
       { name: 'Vendor Register', href: '/vendor-register', icon: UserPlus },
       { name: 'Vendor Details', href: '/vendor-details', icon: Store },
+      { name: 'Vendor Branches', href: '/vendor-branches', icon: Building2 },
       // { name: 'Locations', href: '/locations', icon: MapPin },
       { name: 'Location Mgmt', href: '/location-management', icon: MapPin },
     ];
