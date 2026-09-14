@@ -98,6 +98,7 @@ export const vendorsAPI = {
   updateVendor: (vendorId, vendorData) => api.put(`/vendors/update/${vendorId}`, vendorData),
   updateVendorStatus: (vendorId, status) => api.put(`/vendors/status/${vendorId}`, { status }),
   getVendor: (vendorId) => api.get(`/vendors/get/${vendorId}`),
+  updateDelivery: (deliveryData) => api.put(`/vendors/me/delivery`, deliveryData),
   getBranches: (vendorId) => api.get(`/vendors/${vendorId}/branches`),
   createBranch: (vendorId, branchData) =>
     api.post(`/vendors/${vendorId}/branches`, branchData),
