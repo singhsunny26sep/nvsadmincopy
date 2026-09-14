@@ -13,7 +13,8 @@ import {
   MessageSquare,
   UserPlus,
   Store,
-  Building2
+  Building2,
+  User,
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -25,12 +26,14 @@ const Sidebar = ({ isOpen, onClose }) => {
       { name: 'Customers', href: '/users', icon: Users },
       { name: 'Vendor Register', href: '/vendor-register', icon: UserPlus },
       { name: 'Vendor Details', href: '/vendor-details', icon: Store },
+      { name: 'Vendor Profile', href: '/vendor-profile', icon: User },
       { name: 'Vendor Branches', href: '/vendor-branches', icon: Building2 },
       // { name: 'Locations', href: '/locations', icon: MapPin },
       { name: 'Location Mgmt', href: '/location-management', icon: MapPin },
     ];
     const vendorItems = [
       { name: 'Dashboard', href: '/dashboard', icon: Home },
+      { name: 'Vendor Profile', href: '/vendor-profile', icon: User },
       { name: 'Vendor Branches', href: '/vendor-branches', icon: Building2 },
       { name: 'Products', href: '/products', icon: FileText },
       { name: 'Categories', href: '/category', icon: Settings },

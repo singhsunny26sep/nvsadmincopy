@@ -7,8 +7,10 @@ import "./App.css";
 
 // Lazy imports
 const LoginPage = lazy(() => import("./pages/LoginPage"));
+const VendorLogin = lazy(() => import("./pages/VendorLogin"));
 const VendorRegister = lazy(() => import("./pages/VendorRegister"));
 const VendorDetails = lazy(() => import("./pages/VendorDetails"));
+const VendorProfile = lazy(() => import("./pages/VendorProfile"));
 const VendorBranches = lazy(() => import("./pages/VendorBranches"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const UsersPage = lazy(() => import("./pages/UsersPage"));
@@ -34,11 +36,13 @@ function App() {
           <Routes>
             {/* Public Route */}
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/vendor-login" element={<VendorLogin />} />
             <Route element={<Layout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/vendor-register" element={<VendorRegister />} />
               <Route path="/vendor-details" element={<VendorDetails />} />
+              <Route path="/vendor-profile" element={<VendorProfile />} />
               <Route path="/vendor-branches" element={<VendorBranches />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/category" element={<CategoryManagement />} />
