@@ -31,7 +31,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     ];
     const vendorItems = [
       { name: 'Dashboard', href: '/dashboard', icon: Home },
-
+      { name: 'Vendor Branches', href: '/vendor-branches', icon: Building2 },
       { name: 'Products', href: '/products', icon: FileText },
       { name: 'Categories', href: '/category', icon: Settings },
       { name: 'Sub Categories', href: '/subcategories', icon: Headphones },

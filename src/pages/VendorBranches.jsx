@@ -15,6 +15,8 @@ import {
   X,
   Plus,
 } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 import { usersAPI, vendorsAPI } from "../components/api/api";
 
 const formatDate = (dateString) => {
@@ -28,9 +30,15 @@ const formatDate = (dateString) => {
 };
 
 const VendorBranches = () => {
+  const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlVendorId = searchParams.get("vendorId");
+  const isVendor = user?.role === "vendor";
+  const vendorIdFromAuth = user?._id || "";
+
   const [searchInput, setSearchInput] = useState("");
   const [searchMode, setSearchMode] = useState("id");
-  const [vendorId, setVendorId] = useState("");
+  const [vendorId, setVendorId] = useState(urlVendorId || (isVendor ? vendorIdFromAuth : ""));
   const [vendorName, setVendorName] = useState("");
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -56,6 +64,20 @@ const VendorBranches = () => {
   });
   const searchTimeoutRef = useRef(null);
   const resultsRef = useRef(null);
+
+  useEffect(() => {
+    if (urlVendorId) {
+      setVendorId(urlVendorId);
+      setSearchInput(urlVendorId);
+      fetchBranches(urlVendorId);
+    }
+  }, [urlVendorId]);
+
+  useEffect(() => {
+    if (isVendor && vendorIdFromAuth && !urlVendorId && vendorId === vendorIdFromAuth) {
+      fetchBranches(vendorIdFromAuth);
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -146,6 +168,8 @@ const VendorBranches = () => {
     if (!searchInput.trim()) return;
     if (searchMode === "id") {
       setVendorName("");
+      setVendorId(searchInput.trim());
+      setSearchParams({ vendorId: searchInput.trim() });
       fetchBranches(searchInput.trim());
       setShowResults(false);
     } else {
@@ -166,6 +190,7 @@ const VendorBranches = () => {
   const handleVendorClick = (vendor) => {
     setVendorId(vendor._id);
     setVendorName(vendor.name || vendor.shopName || "");
+    setSearchParams({ vendorId: vendor._id });
     setShowResults(false);
     fetchBranches(vendor._id);
   };
@@ -281,123 +306,125 @@ const VendorBranches = () => {
         </div>
 
         {/* Search Section */}
-        <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 p-6 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder={
-                  searchMode === "id"
-                    ? "Enter Vendor ID (e.g., 6aa72b7afeb1f26d7a6ba2a0)"
-                    : "Search by vendor name, shop name, or phone..."
-                }
-                value={searchInput}
-                onChange={handleSearchInputChange}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="w-full pl-11 pr-24 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:bg-white outline-none transition-all duration-200 hover:border-green-300 text-sm"
-              />
-              {searchMode === "name" && (
-                <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                  {searchLoading && (
-                    <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                  )}
-                </div>
-              )}
-              {/* Search Results Dropdown */}
-              {showResults && searchResults.length > 0 && (
-                <div
-                  ref={resultsRef}
-                  className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-20 max-h-64 overflow-y-auto"
-                >
-                  {searchResults.map((vendor) => (
-                    <button
-                      key={vendor._id}
-                      onClick={() => handleVendorClick(vendor)}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-green-50 transition-colors border-b border-gray-50 last:border-b-0 text-left"
-                    >
-                      <div className="h-9 w-9 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span className="text-sm font-bold text-green-700">
-                          {(vendor.name || "V").charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-800 truncate">
-                          {vendor.name || "N/A"}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {vendor.shopName || "N/A"} • {vendor.mobile || "N/A"}
-                        </p>
-                      </div>
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
-                          vendor.isActive !== false
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {vendor.isActive !== false ? "Active" : "Inactive"}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex bg-gray-100 rounded-lg p-0.5">
-                <button
-                  onClick={() => {
-                    setSearchMode("id");
-                    setSearchInput("");
-                    setSearchResults([]);
-                    setShowResults(false);
-                  }}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+        {!isVendor && (
+          <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 p-6 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder={
                     searchMode === "id"
-                      ? "bg-white text-green-700 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  <Hash className="inline h-3 w-3 mr-1" />
-                  ID
-                </button>
+                      ? "Enter Vendor ID (e.g., 6aa72b7afeb1f26d7a6ba2a0)"
+                      : "Search by vendor name, shop name, or phone..."
+                  }
+                  value={searchInput}
+                  onChange={handleSearchInputChange}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className="w-full pl-11 pr-24 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:bg-white outline-none transition-all duration-200 hover:border-green-300 text-sm"
+                />
+                {searchMode === "name" && (
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                    {searchLoading && (
+                      <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                    )}
+                  </div>
+                )}
+                {/* Search Results Dropdown */}
+                {showResults && searchResults.length > 0 && (
+                  <div
+                    ref={resultsRef}
+                    className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-20 max-h-64 overflow-y-auto"
+                  >
+                    {searchResults.map((vendor) => (
+                      <button
+                        key={vendor._id}
+                        onClick={() => handleVendorClick(vendor)}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-green-50 transition-colors border-b border-gray-50 last:border-b-0 text-left"
+                      >
+                        <div className="h-9 w-9 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-green-700">
+                            {(vendor.name || "V").charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800 truncate">
+                            {vendor.name || "N/A"}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {vendor.shopName || "N/A"} • {vendor.mobile || "N/A"}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
+                            vendor.isActive !== false
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {vendor.isActive !== false ? "Active" : "Inactive"}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex bg-gray-100 rounded-lg p-0.5">
+                  <button
+                    onClick={() => {
+                      setSearchMode("id");
+                      setSearchInput("");
+                      setSearchResults([]);
+                      setShowResults(false);
+                    }}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                      searchMode === "id"
+                        ? "bg-white text-green-700 shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    <Hash className="inline h-3 w-3 mr-1" />
+                    ID
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSearchMode("name");
+                      setSearchInput("");
+                      setSearchResults([]);
+                      setShowResults(false);
+                    }}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                      searchMode === "name"
+                        ? "bg-white text-green-700 shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    <List className="inline h-3 w-3 mr-1" />
+                    Name
+                  </button>
+                </div>
                 <button
-                  onClick={() => {
-                    setSearchMode("name");
-                    setSearchInput("");
-                    setSearchResults([]);
-                    setShowResults(false);
-                  }}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                    searchMode === "name"
-                      ? "bg-white text-green-700 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
+                  onClick={handleSearch}
+                  disabled={!searchInput.trim() || loading || searchLoading}
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3.5 rounded-xl hover:from-green-700 hover:to-emerald-700 shadow-lg shadow-green-500/25 transition-all duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                 >
-                  <List className="inline h-3 w-3 mr-1" />
-                  Name
+                  {loading || searchLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Search className="h-4 w-4" />
+                  )}
+                  Search
                 </button>
               </div>
-              <button
-                onClick={handleSearch}
-                disabled={!searchInput.trim() || loading || searchLoading}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3.5 rounded-xl hover:from-green-700 hover:to-emerald-700 shadow-lg shadow-green-500/25 transition-all duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
-              >
-                {loading || searchLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Search className="h-4 w-4" />
-                )}
-                Search
-              </button>
             </div>
+            <p className="text-xs text-gray-400 mt-2">
+              {searchMode === "id"
+                ? "Enter the Vendor ID to view branches."
+                : "Type to search by vendor name, shop name, or phone number. Click a result to view branches."}
+            </p>
           </div>
-          <p className="text-xs text-gray-400 mt-2">
-            {searchMode === "id"
-              ? "Enter the Vendor ID to view branches."
-              : "Type to search by vendor name, shop name, or phone number. Click a result to view branches."}
-          </p>
-        </div>
+        )}
 
         {/* Error */}
         {error && (
@@ -426,7 +453,7 @@ const VendorBranches = () => {
               <Store className="h-6 w-6 text-white" />
               <div>
                 <h2 className="text-lg font-bold text-white">
-                  {vendorName || "Vendor Branches"}
+                  {vendorName || (isVendor ? (user?.shopName || user?.name || "My Branches") : "Vendor Branches")}
                 </h2>
                 <p className="text-sm text-green-100">
                   Vendor ID: {vendorId}

@@ -22,8 +22,10 @@ import {
   FileText,
   List,
   Filter,
+  Building2,
 } from "lucide-react";
 import { ordersAPI, usersAPI, vendorsAPI } from "../components/api/api";
+import { useNavigate } from "react-router-dom";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -410,6 +412,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
 };
 
 const VendorDetails = () => {
+  const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
   const [searchMode, setSearchMode] = useState("id");
   const [selectedVendorId, setSelectedVendorId] = useState("");
@@ -898,15 +901,24 @@ const VendorDetails = () => {
                   </p>
                 </div>
               </div>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  vendorData.isActive !== false
-                    ? "bg-green-400/30 text-green-100"
-                    : "bg-red-400/30 text-red-100"
-                }`}
-              >
-                {vendorData.isActive !== false ? "Active" : "Inactive"}
-              </span>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigate(`/vendor-branches?vendorId=${vendorData._id}`)}
+                  className="inline-flex items-center gap-2 bg-white text-green-700 px-4 py-2 rounded-xl hover:bg-green-50 shadow-lg transition-all duration-200 font-medium text-sm"
+                >
+                  <Building2 className="h-4 w-4" />
+                  View Branches
+                </button>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    vendorData.isActive !== false
+                      ? "bg-green-400/30 text-green-100"
+                      : "bg-red-400/30 text-red-100"
+                  }`}
+                >
+                  {vendorData.isActive !== false ? "Active" : "Inactive"}
+                </span>
+              </div>
             </div>
 
             <div className="p-6 space-y-6">
