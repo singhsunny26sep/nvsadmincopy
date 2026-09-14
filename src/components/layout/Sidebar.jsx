@@ -26,8 +26,8 @@ const Sidebar = ({ isOpen, onClose }) => {
       { name: 'Location Mgmt', href: '/location-management', icon: MapPin },
     ];
     const vendorItems = [
+      { name: 'Dashboard', href: '/dashboard', icon: Home },
 
-      { name: 'Customers', href: '/users', icon: Users },
       { name: 'Products', href: '/products', icon: FileText },
       { name: 'Categories', href: '/category', icon: Settings },
       { name: 'Sub Categories', href: '/subcategories', icon: Headphones },

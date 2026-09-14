@@ -92,6 +92,13 @@ export const productsAPI = {
   deleteProduct: (id) => api.delete(`/products/delete/${id}`),
 };
 
+// Vendors API endpoints
+export const vendorsAPI = {
+  createVendor: (vendorData) => api.post("/vendors/create", vendorData),
+  updateVendor: (vendorId, vendorData) => api.put(`/vendors/update/${vendorId}`, vendorData),
+  updateVendorStatus: (vendorId, status) => api.put(`/vendors/status/${vendorId}`, { status }),
+};
+
 // Users API endpoints
 export const usersAPI = {
   getUsers: (params) => api.get("/users/getAll", { params }),
