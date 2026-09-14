@@ -62,17 +62,7 @@ const VendorRegister = () => {
     email: "",
     mobile: "",
     password: "",
-    legalName: "",
-    gstNumber: "",
-    fssaiNumber: "",
-    supportMobile: "",
-    commissionPercent: "",
-    payout: {
-      accountHolder: "",
-      accountNumber: "",
-      ifsc: "",
-      upiId: "",
-    },
+ 
     branch: {
       name: "",
       shopOrBuildingNumber: "",
@@ -203,17 +193,7 @@ const VendorRegister = () => {
       email: vendor.email || "",
       mobile: vendor.mobile || "",
       password: "",
-      legalName: vendor.legalName || "",
-      gstNumber: vendor.gstNumber || "",
-      fssaiNumber: vendor.fssaiNumber || "",
-      supportMobile: vendor.supportMobile || "",
-      commissionPercent: vendor.commissionPercent !== undefined ? vendor.commissionPercent : "",
-      payout: {
-        accountHolder: vendor.payout?.accountHolder || "",
-        accountNumber: vendor.payout?.accountNumber || "",
-        ifsc: vendor.payout?.ifsc || "",
-        upiId: vendor.payout?.upiId || "",
-      },
+    
       branch: {
         name: vendor.branch?.name || "",
         shopOrBuildingNumber: vendor.branch?.shopOrBuildingNumber || "",
@@ -249,17 +229,8 @@ const VendorRegister = () => {
       shopName: formData.shopName || undefined,
       name: formData.name || undefined,
       mobile: formData.mobile || undefined,
-      legalName: formData.legalName || undefined,
-      gstNumber: formData.gstNumber || undefined,
-      fssaiNumber: formData.fssaiNumber || undefined,
-      supportMobile: formData.supportMobile || undefined,
-      commissionPercent: formData.commissionPercent || undefined,
-      payout: {
-        accountHolder: formData.payout.accountHolder || undefined,
-        accountNumber: formData.payout.accountNumber || undefined,
-        ifsc: formData.payout.ifsc || undefined,
-        upiId: formData.payout.upiId || undefined,
-      },
+ 
+     
       ...(isEdit ? {} : {
         email: formData.email || undefined,
         password: formData.password || undefined,
@@ -354,12 +325,7 @@ const VendorRegister = () => {
       email: "",
       mobile: "",
       password: "",
-      legalName: "",
-      gstNumber: "",
-      fssaiNumber: "",
-      supportMobile: "",
-      commissionPercent: "",
-      payout: { accountHolder: "", accountNumber: "", ifsc: "", upiId: "" },
+    
       branch: {
         name: "",
         shopOrBuildingNumber: "",
@@ -555,7 +521,7 @@ const VendorRegister = () => {
                       onChange={handleInputChange}
                       placeholder="email@example.com"
                       icon={Mail}
-                      optional={true}
+                      optional={false}
                     />
                   )}
                   {!editingVendor && (
@@ -610,130 +576,9 @@ const VendorRegister = () => {
                 </div>
               )}
 
-              {/* Business Details Section */}
-              <SectionHeader
-                section="business"
-                title="Business Details"
-                icon={Briefcase}
-                expanded={expandedSections.business}
-                onToggle={toggleSection}
-              />
-              {!editingVendor && expandedSections.business && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <FormField
-                    label="Legal Name"
-                    name="legalName"
-                    value={formData.legalName}
-                    onChange={handleInputChange}
-                    placeholder="Enter legal entity name"
-                    icon={FileText}
-                    optional={true}
-                  />
-                  <FormField
-                    label="GST Number"
-                    name="gstNumber"
-                    value={formData.gstNumber}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 29ABCDE1234F1Z5"
-                    icon={Hash}
-                    optional={true}
-                    maxLength={15}
-                  />
-                  <FormField
-                    label="FSSAI Number"
-                    name="fssaiNumber"
-                    value={formData.fssaiNumber}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 11223344556677"
-                    icon={FileText}
-                    optional={true}
-                    maxLength={14}
-                  />
-                  <FormField
-                    label="Commission Percent"
-                    name="commissionPercent"
-                    type="number"
-                    value={formData.commissionPercent}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 5"
-                    icon={Percent}
-                    optional={true}
-                  />
-                </div>
-              )}
+          
 
-              {/* Support Contact Section */}
-              <SectionHeader
-                section="support"
-                title="Support Contact"
-                icon={Smartphone}
-                expanded={expandedSections.support}
-                onToggle={toggleSection}
-              />
-              {expandedSections.support && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <FormField
-                    label="Support Mobile"
-                    name="supportMobile"
-                    type="tel"
-                    value={formData.supportMobile}
-                    onChange={handleInputChange}
-                    placeholder="Support mobile number"
-                    icon={Phone}
-                    optional={true}
-                  />
-                </div>
-              )}
-
-              {/* Payout Details Section */}
-              <SectionHeader
-                section="payout"
-                title="Payout Details"
-                icon={Landmark}
-                expanded={expandedSections.payout}
-                onToggle={toggleSection}
-              />
-              {expandedSections.payout && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <FormField
-                    label="Account Holder Name"
-                    name="payout.accountHolder"
-                    value={formData.payout.accountHolder}
-                    onChange={handleInputChange}
-                    placeholder="Account holder name"
-                    icon={User}
-                    optional={true}
-                  />
-                  <FormField
-                    label="Account Number"
-                    name="payout.accountNumber"
-                    value={formData.payout.accountNumber}
-                    onChange={handleInputChange}
-                    placeholder="Bank account number"
-                    icon={CreditCard}
-                    optional={true}
-                  />
-                  <FormField
-                    label="IFSC Code"
-                    name="payout.ifsc"
-                    value={formData.payout.ifsc}
-                    onChange={handleInputChange}
-                    placeholder="e.g., SBIN0001234"
-                    icon={Landmark}
-                    optional={true}
-                    maxLength={11}
-                  />
-                  <FormField
-                    label="UPI ID"
-                    name="payout.upiId"
-                    value={formData.payout.upiId}
-                    onChange={handleInputChange}
-                    placeholder="e.g., nagraj@okaxis"
-                    icon={Smartphone}
-                    optional={true}
-                  />
-                </div>
-              )}
+             
 
               {/* Branch Information Section */}
               {!editingVendor && (
