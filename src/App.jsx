@@ -8,6 +8,7 @@ import "./App.css";
 // Lazy imports
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const VendorRegister = lazy(() => import("./pages/VendorRegister"));
+const VendorDetails = lazy(() => import("./pages/VendorDetails"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const UsersPage = lazy(() => import("./pages/UsersPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
@@ -36,6 +37,7 @@ function App() {
               <Route path="/" element={<DashboardPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/vendor-register" element={<VendorRegister />} />
+              <Route path="/vendor-details" element={<VendorDetails />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/category" element={<CategoryManagement />} />
               <Route path="/subcategories" element={<SubCategoryManagement />} />

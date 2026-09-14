@@ -1,17 +1,18 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { 
-  Home, 
-  Users, 
-  Settings, 
-  Shield, 
-  MapPin, 
-  Headphones, 
+import {
+  Home,
+  Users,
+  Settings,
+  Shield,
+  MapPin,
+  Headphones,
   FileText,
   X,
   Activity,
   MessageSquare,
-  UserPlus
+  UserPlus,
+  Store
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -22,6 +23,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       { name: 'Dashboard', href: '/dashboard', icon: Home },
       { name: 'Customers', href: '/users', icon: Users },
       { name: 'Vendor Register', href: '/vendor-register', icon: UserPlus },
+      { name: 'Vendor Details', href: '/vendor-details', icon: Store },
       // { name: 'Locations', href: '/locations', icon: MapPin },
       { name: 'Location Mgmt', href: '/location-management', icon: MapPin },
     ];
