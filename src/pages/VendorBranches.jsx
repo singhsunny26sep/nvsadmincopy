@@ -13,6 +13,7 @@ import {
   Calendar,
   Check,
   X,
+  Plus,
 } from "lucide-react";
 import { usersAPI, vendorsAPI } from "../components/api/api";
 
@@ -37,6 +38,22 @@ const VendorBranches = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    shopOrBuildingNumber: "",
+    address: "",
+    area: "",
+    city: "",
+    district: "",
+    state: "",
+    country: "India",
+    zipcode: "",
+    coordinates: { latitude: "", longitude: "" },
+    isDefault: false,
+  });
   const searchTimeoutRef = useRef(null);
   const resultsRef = useRef(null);
 
@@ -151,6 +168,74 @@ const VendorBranches = () => {
     setVendorName(vendor.name || vendor.shopName || "");
     setShowResults(false);
     fetchBranches(vendor._id);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      shopOrBuildingNumber: "",
+      address: "",
+      area: "",
+      city: "",
+      district: "",
+      state: "",
+      country: "India",
+      zipcode: "",
+      coordinates: { latitude: "", longitude: "" },
+      isDefault: false,
+    });
+    setFormError(null);
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    if (name.startsWith("coordinates.")) {
+      const coordField = name.split(".")[1];
+      setFormData((prev) => ({
+        ...prev,
+        coordinates: { ...prev.coordinates, [coordField]: value },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }));
+    }
+  };
+
+  const handleCreateBranch = async (e) => {
+    e.preventDefault();
+    setFormError(null);
+    setSubmitting(true);
+    try {
+      const payload = {
+        name: formData.name || undefined,
+        shopOrBuildingNumber: formData.shopOrBuildingNumber || undefined,
+        address: formData.address || undefined,
+        area: formData.area || undefined,
+        city: formData.city || undefined,
+        district: formData.district || undefined,
+        state: formData.state || undefined,
+        country: formData.country || undefined,
+        zipcode: formData.zipcode || undefined,
+        coordinates: [
+          formData.coordinates.latitude || undefined,
+          formData.coordinates.longitude || undefined,
+        ].filter((v) => v !== undefined && v !== ""),
+        isDefault: formData.isDefault,
+      };
+      const response = await vendorsAPI.createBranch(vendorId, payload);
+      setShowCreateForm(false);
+      resetForm();
+      await fetchBranches(vendorId);
+    } catch (err) {
+      console.error("Error creating branch:", err);
+      setFormError(
+        err.response?.data?.message || "Failed to create branch. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const getStatusBadge = (isDefault) => {
@@ -348,9 +433,21 @@ const VendorBranches = () => {
                 </p>
               </div>
             </div>
-            <span className="text-sm text-green-100">
-              {branches.length} branch{branches.length !== 1 ? "es" : ""} found
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-green-100">
+                {branches.length} branch{branches.length !== 1 ? "es" : ""} found
+              </span>
+              <button
+                onClick={() => {
+                  resetForm();
+                  setShowCreateForm(true);
+                }}
+                className="inline-flex items-center gap-2 bg-white text-green-700 px-4 py-2 rounded-xl hover:bg-green-50 shadow-lg transition-all duration-200 font-medium text-sm"
+              >
+                <Plus className="h-4 w-4" />
+                Create Branch
+              </button>
+            </div>
           </div>
         )}
 
@@ -492,6 +589,236 @@ const VendorBranches = () => {
             <p className="text-sm text-gray-400">
               This vendor has no branches registered.
             </p>
+          </div>
+        )}
+
+        {/* Create Branch Modal */}
+        {showCreateForm && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-800">
+                  Create New Branch
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowCreateForm(false);
+                    resetForm();
+                  }}
+                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X size={20} className="text-gray-500" />
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateBranch} className="p-6 space-y-5">
+                {formError && (
+                  <div className="flex items-center p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <XCircle className="h-5 w-5 text-red-600 flex-shrink-0 mr-3" />
+                    <p className="text-sm text-red-700 font-medium">{formError}</p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Branch Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleFormChange}
+                      placeholder="e.g., Shivaji Nagar Branch"
+                      required
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Shop / Building Number
+                    </label>
+                    <input
+                      type="text"
+                      name="shopOrBuildingNumber"
+                      value={formData.shopOrBuildingNumber}
+                      onChange={handleFormChange}
+                      placeholder="e.g., 8"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Area
+                    </label>
+                    <input
+                      type="text"
+                      name="area"
+                      value={formData.area}
+                      onChange={handleFormChange}
+                      placeholder="e.g., Shivaji Nagar"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleFormChange}
+                      placeholder="Full address"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleFormChange}
+                      placeholder="e.g., Davangere"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      District
+                    </label>
+                    <input
+                      type="text"
+                      name="district"
+                      value={formData.district}
+                      onChange={handleFormChange}
+                      placeholder="e.g., Davangere"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      State
+                    </label>
+                    <input
+                      type="text"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleFormChange}
+                      placeholder="e.g., Karnataka"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Country
+                    </label>
+                    <input
+                      type="text"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleFormChange}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Zipcode
+                    </label>
+                    <input
+                      type="text"
+                      name="zipcode"
+                      value={formData.zipcode}
+                      onChange={handleFormChange}
+                      placeholder="e.g., 577002"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Coordinates */}
+                <div className="border border-green-200 rounded-xl p-4 bg-green-50">
+                  <h3 className="font-semibold text-green-800 mb-3">
+                    Coordinates
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Latitude
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        name="coordinates.latitude"
+                        value={formData.coordinates.latitude}
+                        onChange={handleFormChange}
+                        placeholder="e.g., 14.4712"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Longitude
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        name="coordinates.longitude"
+                        value={formData.coordinates.longitude}
+                        onChange={handleFormChange}
+                        placeholder="e.g., 75.9105"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Is Default */}
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    name="isDefault"
+                    checked={formData.isDefault}
+                    onChange={handleFormChange}
+                    className="h-5 w-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                  />
+                  <span className="text-sm font-semibold text-gray-700">
+                    Set as Default Branch
+                  </span>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      "Create Branch"
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateForm(false);
+                      resetForm();
+                    }}
+                    className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </div>
