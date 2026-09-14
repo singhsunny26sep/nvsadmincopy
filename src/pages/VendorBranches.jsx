@@ -464,16 +464,18 @@ const VendorBranches = () => {
               <span className="text-sm text-green-100">
                 {branches.length} branch{branches.length !== 1 ? "es" : ""} found
               </span>
-              <button
-                onClick={() => {
-                  resetForm();
-                  setShowCreateForm(true);
-                }}
-                className="inline-flex items-center gap-2 bg-white text-green-700 px-4 py-2 rounded-xl hover:bg-green-50 shadow-lg transition-all duration-200 font-medium text-sm"
-              >
-                <Plus className="h-4 w-4" />
-                Create Branch
-              </button>
+              {!isVendor && (
+                <button
+                  onClick={() => {
+                    resetForm();
+                    setShowCreateForm(true);
+                  }}
+                  className="inline-flex items-center gap-2 bg-white text-green-700 px-4 py-2 rounded-xl hover:bg-green-50 shadow-lg transition-all duration-200 font-medium text-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                  Create Branch
+                </button>
+              )}
             </div>
           </div>
         )}
