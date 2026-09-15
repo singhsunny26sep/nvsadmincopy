@@ -185,6 +185,14 @@ export const settingsAPI = {
     api.put(`/settings/${id}`, settingsData, {
       headers: { "Content-Type": "application/json" },
     }),
+  updateDeliverySettings: (deliveryData) =>
+    api.put(
+      "/settings/update",
+      { delivery: deliveryData },
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    ),
 };
 
 // Support API endpoints

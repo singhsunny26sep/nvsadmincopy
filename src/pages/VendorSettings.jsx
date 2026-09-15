@@ -455,7 +455,6 @@ const VendorSettings = () => {
               </div>
             </div>
           </div>
-
           <div className="flex items-center justify-end gap-4">
             <button
               type="button"

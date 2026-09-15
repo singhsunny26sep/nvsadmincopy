@@ -1,180 +1,245 @@
-import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Save, RefreshCw } from 'lucide-react';
-import { settingsAPI, locationsAPI } from '../../components/api/api';
+import React, { useState, useEffect } from "react";
+import { Settings as SettingsIcon, Save, RefreshCw, MapPin, CreditCard, Check, XCircle } from "lucide-react";
+import { settingsAPI } from "../../components/api/api";
 
-const SettingsPage = () => {
-  const [settings, setSettings] = useState({
-    delivery: {
-      shopLocationId: '',
-      baseCharge: 30,
-      perKmRate: 5,
-      perKgRate: 1.5,
-      minDeliveryCharge: 40,
-      baseMaxCharge: 150,
-      maxPerKgIncrement: 1.2,
-      maxPerKmIncrement: 4,
-      maxRadiusKm: 50,
-      distanceFactor: 4,
-      weightFactor: 6
-    }
-  });
-  const [locations, setLocations] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [saveLoading, setSaveLoading] = useState(false);
+const initialFormData = {
+  maxRadiusKm: "",
+  maxAllowedDeliveryCharge: "",
+};
+
+const Settings = () => {
+  const [formData, setFormData] = useState(initialFormData);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchSettings();
-    fetchLocations();
-  }, []);
-
-  const fetchLocations = async () => {
-    try {
-      const response = await locationsAPI.getAllLocations();
-      const locationsData = response?.data?.data?.data || response?.data?.data || response?.data || [];
-      setLocations(locationsData);
-    } catch (err) {
-      console.error('Error fetching locations:', err);
-    }
-  };
+  const [submitting, setSubmitting] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const fetchSettings = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
       const response = await settingsAPI.getSettings();
-      const settingsData = response?.data?.data?.data || response?.data?.data || response?.data;
-      
-      if (settingsData && settingsData.delivery) {
-        setSettings(settingsData);
+      const data = response.data?.data;
+      const delivery = data?.delivery || data;
+
+      if (delivery) {
+        setFormData({
+          maxRadiusKm:
+            delivery.maxRadiusKm != null ? String(delivery.maxRadiusKm) : "",
+          maxAllowedDeliveryCharge:
+            delivery.maxAllowedDeliveryCharge != null
+              ? String(delivery.maxAllowedDeliveryCharge)
+              : "",
+        });
       }
     } catch (err) {
-      console.error('Error fetching settings:', err);
-      setError('Failed to load settings');
+      console.error("Error fetching settings:", err);
+      setError(
+        err.response?.data?.message || "Failed to load settings."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (section, field, value) => {
-    const numericFields = ['baseCharge', 'perKmRate', 'perKgRate', 'minDeliveryCharge', 'baseMaxCharge', 'maxPerKgIncrement', 'maxPerKmIncrement', 'maxRadiusKm', 'distanceFactor', 'weightFactor'];
-    setSettings(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: numericFields.includes(field) ? parseFloat(value) || 0 : value
-      }
-    }));
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setSaveSuccess(false);
   };
 
-  const handleSave = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    setSaveSuccess(false);
+
+    const payload = {
+      maxRadiusKm: formData.maxRadiusKm !== "" ? Number(formData.maxRadiusKm) : 0,
+      maxAllowedDeliveryCharge:
+        formData.maxAllowedDeliveryCharge !== ""
+          ? Number(formData.maxAllowedDeliveryCharge)
+          : 0,
+    };
+
     try {
-      setSaveLoading(true);
-      setError(null);
-      const response = await settingsAPI.createSettings(settings);
-      console.log('Settings saved:', response.data);
-      alert('Settings saved successfully!');
+      const response = await settingsAPI.updateDeliverySettings(payload);
+      if (response.data && response.data.success) {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        setError(
+          response.data?.message || "Failed to update delivery settings."
+        );
+      }
     } catch (err) {
-      console.error('Error saving settings:', err);
-      setError('Failed to save settings');
-      alert('Failed to save settings');
+      console.error("Error updating delivery settings:", err);
+      setError(
+        err.response?.data?.message || "Failed to update delivery settings."
+      );
     } finally {
-      setSaveLoading(false);
+      setSubmitting(false);
     }
   };
 
-  const deliveryFields = [
-    { key: 'shopLocationId', label: 'Shop Location', description: 'Select shop location for delivery', type: 'select' },
-    { key: 'baseCharge', label: 'Base Charge', description: 'Starting delivery charge', type: 'number' },
-    { key: 'perKmRate', label: 'Per Km Rate', description: 'Charge per kilometer', type: 'number' },
-    { key: 'perKgRate', label: 'Per Kg Rate', description: 'Charge per kg weight', type: 'number' },
-    { key: 'minDeliveryCharge', label: 'Min Delivery Charge', description: 'Minimum delivery charge', type: 'number' },
-    { key: 'baseMaxCharge', label: 'Base Max Charge', description: 'Maximum base charge cap', type: 'number' },
-    { key: 'maxPerKgIncrement', label: 'Max Per Kg Increment', description: 'Max increment per kg', type: 'number' },
-    { key: 'maxPerKmIncrement', label: 'Max Per Km Increment', description: 'Max increment per km', type: 'number' },
-    { key: 'maxRadiusKm', label: 'Max Radius (Km)', description: 'Maximum delivery radius in km', type: 'number' },
-    { key: 'distanceFactor', label: 'Distance Factor', description: 'Distance calculation factor', type: 'number' },
-    { key: 'weightFactor', label: 'Weight Factor', description: 'Weight calculation factor', type: 'number' }
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative inline-flex">
+            <div className="w-12 h-12 border-4 border-green-100 rounded-full"></div>
+            <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+          </div>
+          <p className="mt-4 text-sm text-gray-500 font-medium">
+            Loading settings...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-          <SettingsIcon className="text-green-600" size={36} />
-          Delivery Settings
-        </h1>
-        <p className="text-gray-600">
-          Configure delivery charges and parameters for your rice mart
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-green-100/40 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 -left-40 w-80 h-80 bg-emerald-100/30 rounded-full blur-3xl"></div>
       </div>
 
-      {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          <p>{error}</p>
-        </div>
-      )}
-
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Delivery Configuration</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {deliveryFields.map(({ key, label, description, type }) => (
-              <div key={key}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {label}
-                </label>
-                {type === 'select' ? (
-                  <select
-                    value={settings.delivery[key]}
-                    onChange={(e) => handleInputChange('delivery', key, e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="">Select a location</option>
-                    {locations.map((loc) => (
-                      <option key={loc._id} value={loc._id}>
-                        {loc.name} - {loc.address}, {loc.city}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={settings.delivery[key]}
-                    onChange={(e) => handleInputChange('delivery', key, e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder={description}
-                  />
-                )}
-                <p className="text-xs text-gray-500 mt-1">{description}</p>
-              </div>
-            ))}
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="h-12 w-12 bg-gradient-to-br from-green-600 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/25">
+              <SettingsIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Settings
+              </h1>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Configure delivery and system settings
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="flex gap-3 pt-4 border-t">
-          <button
-            onClick={handleSave}
-            disabled={saveLoading || loading}
-            className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-medium transition-colors disabled:opacity-50"
-          >
-            {saveLoading ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
-            {saveLoading ? 'Saving...' : 'Save Settings'}
-          </button>
-          <button
-            onClick={fetchSettings}
-            disabled={loading}
-            className="flex items-center gap-2 bg-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-400 font-medium transition-colors disabled:opacity-50"
-          >
-            <RefreshCw size={18} />
-            Refresh
-          </button>
-        </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-center gap-3">
+            <XCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+            <p className="text-sm text-red-700 font-medium">{error}</p>
+            <button
+              onClick={() => setError(null)}
+              className="ml-auto text-sm text-red-600 hover:text-red-800 font-medium"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        {saveSuccess && (
+          <div className="mb-6 flex items-center p-4 bg-green-50 border border-green-100 rounded-xl">
+            <div className="h-8 w-8 bg-green-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+              <Check className="h-4 w-4 text-green-600" />
+            </div>
+            <p className="text-sm text-green-700 font-medium">
+              Delivery settings updated successfully!
+            </p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden mb-6">
+            <div className="p-6 sm:p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-9 w-9 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg flex items-center justify-center">
+                  <MapPin className="h-5 w-5 text-green-600" />
+                </div>
+                <span className="font-semibold text-gray-800 text-sm">
+                  Delivery Configuration
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Max Radius (KM)
+                  </label>
+                  <div className="relative group">
+                    <MapPin className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10 h-5 w-5 text-gray-400" />
+                    <input
+                      type="number"
+                      name="maxRadiusKm"
+                      value={formData.maxRadiusKm}
+                      onChange={handleInputChange}
+                      placeholder="e.g. 50"
+                      step="0.1"
+                      min="0"
+                      className="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:bg-white outline-none transition-all duration-200 hover:border-green-300"
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-gray-400">
+                    Maximum delivery distance in kilometers
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Max Allowed Delivery Charge
+                  </label>
+                  <div className="relative group">
+                    <CreditCard className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10 h-5 w-5 text-gray-400" />
+                    <input
+                      type="number"
+                      name="maxAllowedDeliveryCharge"
+                      value={formData.maxAllowedDeliveryCharge}
+                      onChange={handleInputChange}
+                      placeholder="e.g. 200"
+                      step="0.01"
+                      min="0"
+                      className="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:bg-white outline-none transition-all duration-200 hover:border-green-300"
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-gray-400">
+                    Maximum cap on delivery charges
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-4">
+            <button
+              type="button"
+              onClick={fetchSettings}
+              className="px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium text-sm"
+            >
+              Reset
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 shadow-lg shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+            >
+              {submitting ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Save Settings
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
-export default SettingsPage;
+export default Settings;
