@@ -466,7 +466,7 @@ const VendorSettings = () => {
             </button>
             <button
               type="submit"
-              disabled={submitting || !formData.isEnabled}
+              disabled={submitting}
               className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 shadow-lg shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transform hover:scale-[1.01] active:scale-[0.99]"
             >
               {submitting ? (

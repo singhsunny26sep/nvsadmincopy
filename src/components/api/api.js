@@ -126,6 +126,8 @@ export const ordersAPI = {
   getOrders: (params) => api.get("/orders/getAll", { params }),
   getOrderById: (id) => api.get(`/orders/get/${id}`),
   updateOrder: (id, data) => api.put(`/orders/update/${id}`, data),
+  updateOrderStatus: (id, statusData) =>
+    api.put(`/orders/${id}/status`, statusData),
   deleteOrder: (id) => api.delete(`/orders/delete/${id}`),
 };
 

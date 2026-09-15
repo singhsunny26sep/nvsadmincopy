@@ -5,7 +5,7 @@ import { ShoppingBag, Eye, Package, TrendingUp, DollarSign, User, Phone, MapPin,
 import { ordersAPI } from '../../components/api/api';
 
 // Order Details Modal Component - Enhanced to show all fields
-const OrderDetailsModal = ({ order, onClose, onConfirm, onCancel, onComplete, onPending }) => {
+const OrderDetailsModal = ({ order, onClose, onConfirm, onCancel, onComplete, onPending, onPacked, onOutForDelivery }) => {
   if (!order) return null;
 
   // Use original API data if available, otherwise use mapped order
@@ -17,7 +17,11 @@ const OrderDetailsModal = ({ order, onClose, onConfirm, onCancel, onComplete, on
       case 'CONFIRMED': return 'text-blue-600 bg-blue-50';
       case 'PENDING': return 'text-orange-600 bg-orange-50';
       case 'INITIATED': return 'text-yellow-600 bg-yellow-50';
-      case 'CANCELLED': return 'text-red-600 bg-red-50';
+       case 'CANCELLED': return 'text-red-600 bg-red-50';
+       case 'REJECTED': return 'text-red-600 bg-red-50';
+       case 'ACCEPTED': return 'text-blue-600 bg-blue-50';
+       case 'PACKED': return 'text-indigo-600 bg-indigo-50';
+       case 'OUT_FOR_DELIVERY': return 'text-cyan-600 bg-cyan-50';
       default: return 'text-gray-600 bg-gray-50';
     }
   };
@@ -32,8 +36,8 @@ const OrderDetailsModal = ({ order, onClose, onConfirm, onCancel, onComplete, on
     }
   };
 
-  // Check if order can be acted upon (only for Pending and Confirmed orders)
-  const canTakeAction = apiOrder.status === 'PENDING' || apiOrder.status === 'CONFIRMED';
+   // Check if order can be acted upon (only for Pending and Confirmed orders)
+  const canTakeAction = apiOrder.status === 'PENDING' || apiOrder.status === 'CONFIRMED' || apiOrder.status === 'INITIATED' || apiOrder.status === 'ACCEPTED' || apiOrder.status === 'PACKED' || apiOrder.status === 'OUT_FOR_DELIVERY';
 
   // Format date
   const formatDate = (dateString) => {
@@ -295,26 +299,60 @@ const OrderDetailsModal = ({ order, onClose, onConfirm, onCancel, onComplete, on
 
         {/* Footer with Action Buttons */}
         <div className="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-between items-center sticky bottom-0">
-          {canTakeAction ? (
-            <div className="flex flex-wrap gap-3">
-              {apiOrder.status === 'CONFIRMED' ? (
-                <>
-                  <button
-                    onClick={() => onComplete(order)}
-                    className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors"
-                  >
-                    <Package size={18} />
-                    Out for Delivery
-                  </button>
-                  <button
-                    onClick={() => onCancel(order)}
-                    className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-                  >
-                    <X size={18} />
-                    Cancel Order
-                  </button>
-                </>
-              ) : (
+    {canTakeAction ? (
+              <div className="flex flex-wrap gap-3">
+                {apiOrder.status === 'OUT_FOR_DELIVERY' ? (
+                  <>
+                    <button
+                      onClick={() => onComplete(order)}
+                      className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors"
+                    >
+                      <CheckCircle size={18} />
+                      Mark Delivered
+                    </button>
+                    <button
+                      onClick={() => onCancel(order)}
+                      className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+                    >
+                      <X size={18} />
+                      Cancel Order
+                    </button>
+                  </>
+                ) : apiOrder.status === 'PACKED' ? (
+                  <>
+                    <button
+                      onClick={() => onOutForDelivery(order)}
+                      className="flex items-center gap-2 bg-cyan-600 text-white px-4 py-2 rounded-md hover:bg-cyan-700 transition-colors"
+                    >
+                      <Truck size={18} />
+                      Out for Delivery
+                    </button>
+                    <button
+                      onClick={() => onCancel(order)}
+                      className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+                    >
+                      <X size={18} />
+                      Cancel Order
+                    </button>
+                  </>
+                ) : apiOrder.status === 'ACCEPTED' || apiOrder.status === 'CONFIRMED' ? (
+                 <>
+                   <button
+                     onClick={() => onPacked(order)}
+                     className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
+                   >
+                     <Package size={18} />
+                     Mark Packed
+                   </button>
+                   <button
+                     onClick={() => onCancel(order)}
+                     className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+                   >
+                     <X size={18} />
+                     Cancel Order
+                   </button>
+                 </>
+               ) : (
                 <>
                   <button
                     onClick={() => onComplete(order)}
@@ -349,9 +387,9 @@ const OrderDetailsModal = ({ order, onClose, onConfirm, onCancel, onComplete, on
             </div>
           ) : (
             <div className="text-sm text-gray-500">
-              {apiOrder.status === 'DELIVERED' ? '✓ Order completed' : 
-               apiOrder.status === 'CANCELLED' ? '✗ Order cancelled' : 
-               'Order status cannot be changed'}
+               {apiOrder.status === 'DELIVERED' ? '✓ Order completed' : 
+                apiOrder.status === 'CANCELLED' || apiOrder.status === 'REJECTED' ? '✗ Order cancelled' : 
+                'Order status cannot be changed'}
             </div>
           )}
           <button
@@ -428,7 +466,10 @@ const OrderHistory = () => {
     totalRevenue: ordersList.reduce((sum, order) => sum + (order.payableAmount || order.totalAmount || 0), 0),
     deliveredOrders: ordersList.filter(order => order.status === 'DELIVERED').length,
     pendingOrders: ordersList.filter(order => order.status === 'PENDING').length,
-    cancelledOrders: ordersList.filter(order => order.status === 'CANCELLED').length,
+    acceptedOrders: ordersList.filter(order => order.status === 'ACCEPTED' || order.status === 'CONFIRMED').length,
+    packedOrders: ordersList.filter(order => order.status === 'PACKED').length,
+    outForDeliveryOrders: ordersList.filter(order => order.status === 'OUT_FOR_DELIVERY').length,
+    cancelledOrders: ordersList.filter(order => order.status === 'CANCELLED' || order.status === 'REJECTED').length,
   });
 
   const calculateOrderStats = async (firstPageData) => {
@@ -585,7 +626,11 @@ const OrderHistory = () => {
             case 'CONFIRMED': return 'bg-blue-100 text-blue-800';
             case 'PENDING': return 'bg-orange-100 text-orange-800';
             case 'INITIATED': return 'bg-yellow-100 text-yellow-800';
-            case 'CANCELLED': return 'bg-red-100 text-red-800';
+             case 'CANCELLED': return 'bg-red-100 text-red-800';
+             case 'REJECTED': return 'bg-red-100 text-red-800';
+             case 'ACCEPTED': return 'bg-blue-100 text-blue-800';
+              case 'PACKED': return 'bg-indigo-100 text-indigo-800';
+              case 'OUT_FOR_DELIVERY': return 'bg-cyan-100 text-cyan-800';
             default: return 'bg-gray-100 text-gray-800';
           }
         };
@@ -854,45 +899,170 @@ const OrderHistory = () => {
 
   // Handle Confirm order
   async function handleConfirm(order) {
+    const note = window.prompt(
+      'Enter a note for this order confirmation:',
+      'Order confirm, packing shuru'
+    );
+    if (note === null) return;
+    const confirmNote = note.trim() || 'Order confirmed';
+
+    if (!window.confirm(`Confirm this order with note: "${confirmNote}"?`)) return;
+
     try {
       const orderId = order.id || order._id;
-      await ordersAPI.updateOrder(orderId, { status: 'CONFIRMED' });
+      const response = await ordersAPI.updateOrderStatus(orderId, {
+        status: 'ACCEPTED',
+        note: confirmNote,
+      });
+
+      if (response.data?.data?.status === 'ACCEPTED') {
+        console.log('Order accepted:', response.data.data);
+      }
+
       await fetchOrders();
       setSelectedOrder(null);
     } catch (err) {
       console.error('Error updating order status:', err);
-      alert('Failed to update order status. Please try again.');
+      alert(
+        err.response?.data?.message ||
+          'Failed to update order status. Please try again.'
+      );
     }
   }
 
   // Handle Cancel order
   async function handleCancel(order) {
-    if (!window.confirm('Are you sure you want to cancel this order?')) return;
+    const reason = window.prompt(
+      'Please enter a reason for canceling this order:',
+      'Stock khatam ho gaya'
+    );
+    if (reason === null) return;
+    const cancelReason = reason.trim() || 'No reason provided';
+
+    if (!window.confirm(`Cancel this order with reason: "${cancelReason}"?`)) return;
+
     try {
       const orderId = order.id || order._id;
-      await ordersAPI.updateOrder(orderId, { status: 'CANCELLED' });
+      const response = await ordersAPI.updateOrderStatus(orderId, {
+        status: 'REJECTED',
+        reason: cancelReason,
+      });
+
+      if (response.data?.data?.status === 'REJECTED') {
+        console.log('Order rejected:', response.data.data);
+      }
+
       await fetchOrders();
       setSelectedOrder(null);
     } catch (err) {
       console.error('Error updating order status:', err);
-      alert('Failed to update order status. Please try again.');
+      alert(
+        err.response?.data?.message ||
+          'Failed to update order status. Please try again.'
+      );
     }
   }
 
   // Handle Complete/Delivered order
   async function handleComplete(order) {
+    const note = window.prompt(
+      'Enter a note for delivery confirmation:',
+      'Order delivered successfully'
+    );
+    if (note === null) return;
+    const deliverNote = note.trim() || 'Order delivered';
+
+    if (!window.confirm(`Mark this order as delivered with note: "${deliverNote}"?`)) return;
+
     try {
       const orderId = order.id || order._id;
-      await ordersAPI.updateOrder(orderId, { status: 'DELIVERED' });
+      const response = await ordersAPI.updateOrderStatus(orderId, {
+        status: 'DELIVERED',
+        note: deliverNote,
+      });
+
+      if (response.data?.data?.status === 'DELIVERED') {
+        console.log('Order delivered:', response.data.data);
+      }
+
       await fetchOrders();
       setSelectedOrder(null);
     } catch (err) {
       console.error('Error updating order status:', err);
-      alert('Failed to update order status. Please try again.');
+      alert(
+        err.response?.data?.message ||
+          'Failed to update order status. Please try again.'
+      );
     }
   }
 
-  // Handle Pending order
+  // Handle Packed order
+  async function handlePacked(order) {
+    const note = window.prompt(
+      'Enter a note for packing:',
+      'Items pack ho gaye'
+    );
+    if (note === null) return;
+    const packNote = note.trim() || 'Order packed';
+
+    if (!window.confirm(`Mark this order as packed with note: "${packNote}"?`)) return;
+
+    try {
+      const orderId = order.id || order._id;
+      const response = await ordersAPI.updateOrderStatus(orderId, {
+        status: 'PACKED',
+        note: packNote,
+      });
+
+      if (response.data?.data?.status === 'PACKED') {
+        console.log('Order packed:', response.data.data);
+      }
+
+      await fetchOrders();
+      setSelectedOrder(null);
+    } catch (err) {
+      console.error('Error updating order status:', err);
+      alert(
+        err.response?.data?.message ||
+          'Failed to update order status. Please try again.'
+      );
+    }
+  }
+
+   // Handle Out for Delivery order
+   async function handleOutForDelivery(order) {
+     const note = window.prompt(
+       'Enter a note for delivery dispatch:',
+       'Out For Delivery'
+     );
+     if (note === null) return;
+     const dispatchNote = note.trim() || 'Out for delivery';
+
+     if (!window.confirm(`Mark this order as out for delivery with note: "${dispatchNote}"?`)) return;
+
+     try {
+       const orderId = order.id || order._id;
+       const response = await ordersAPI.updateOrderStatus(orderId, {
+         status: 'OUT_FOR_DELIVERY',
+         note: dispatchNote,
+       });
+
+       if (response.data?.data?.status === 'OUT_FOR_DELIVERY') {
+         console.log('Order out for delivery:', response.data.data);
+       }
+
+       await fetchOrders();
+       setSelectedOrder(null);
+     } catch (err) {
+       console.error('Error updating order status:', err);
+       alert(
+         err.response?.data?.message ||
+           'Failed to update order status. Please try again.'
+       );
+     }
+   }
+
+   // Handle Pending order
   async function handlePending(order) {
     try {
       const orderId = order.id || order._id;
@@ -914,7 +1084,10 @@ const OrderHistory = () => {
   const totalRevenue = orderStats.totalRevenue;
   const deliveredOrders = orderStats.deliveredOrders;
   const pendingOrders = orderStats.pendingOrders;
-  const cancelledOrders = orderStats.cancelledOrders;
+   const cancelledOrders = orderStats.cancelledOrders;
+   const acceptedOrders = orderStats.acceptedOrders;
+   const packedOrders = orderStats.packedOrders;
+   const outForDeliveryOrders = orderStats.outForDeliveryOrders;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -959,24 +1132,51 @@ const OrderHistory = () => {
               <Check className="text-green-600" size={32} />
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-orange-600">{loading ? '...' : pendingOrders}</p>
-              </div>
-              <Clock className="text-orange-600" size={32} />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Cancelled</p>
-                <p className="text-2xl font-bold text-red-600">{loading ? '...' : cancelledOrders}</p>
-              </div>
-              <X className="text-red-600" size={32} />
-            </div>
-          </div>
+           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+             <div className="flex items-center justify-between">
+               <div>
+                 <p className="text-sm text-gray-600">Pending</p>
+                 <p className="text-2xl font-bold text-orange-600">{loading ? '...' : pendingOrders}</p>
+               </div>
+               <Clock className="text-orange-600" size={32} />
+             </div>
+           </div>
+           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+             <div className="flex items-center justify-between">
+               <div>
+                 <p className="text-sm text-gray-600">Accepted</p>
+                 <p className="text-2xl font-bold text-blue-600">{loading ? '...' : acceptedOrders}</p>
+               </div>
+               <CheckCircle className="text-blue-600" size={32} />
+             </div>
+           </div>
+           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+             <div className="flex items-center justify-between">
+               <div>
+                 <p className="text-sm text-gray-600">Packed</p>
+                 <p className="text-2xl font-bold text-indigo-600">{loading ? '...' : packedOrders}</p>
+               </div>
+               <Package className="text-indigo-600" size={32} />
+             </div>
+           </div>
+           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+             <div className="flex items-center justify-between">
+               <div>
+                 <p className="text-sm text-gray-600">Out for Delivery</p>
+                 <p className="text-2xl font-bold text-cyan-600">{loading ? '...' : outForDeliveryOrders}</p>
+               </div>
+               <Truck className="text-cyan-600" size={32} />
+             </div>
+           </div>
+           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+             <div className="flex items-center justify-between">
+               <div>
+                 <p className="text-sm text-gray-600">Cancelled</p>
+                 <p className="text-2xl font-bold text-red-600">{loading ? '...' : cancelledOrders}</p>
+               </div>
+               <X className="text-red-600" size={32} />
+             </div>
+           </div>
         </div>
         {/* Month Filter */}
          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 p-4">
@@ -1010,7 +1210,7 @@ const OrderHistory = () => {
          {/* Filter Tabs */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 p-4">
           <div className="flex flex-wrap gap-2">
-            {['All', 'INITIATED', 'PENDING', 'CONFIRMED', 'DELIVERED', 'CANCELLED'].map((status) => (
+            {['All', 'INITIATED', 'PENDING', 'ACCEPTED', 'CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED', 'REJECTED'].map((status) => (
               <button
                 key={status}
                 onClick={() => {
@@ -1090,10 +1290,12 @@ const OrderHistory = () => {
           <OrderDetailsModal
             order={selectedOrder}
             onClose={handleCloseModal}
-            onConfirm={handleConfirm}
-            onCancel={handleCancel}
-            onComplete={handleComplete}
-            onPending={handlePending}
+             onConfirm={handleConfirm}
+             onCancel={handleCancel}
+             onComplete={handleComplete}
+             onPending={handlePending}
+             onPacked={handlePacked}
+             onOutForDelivery={handleOutForDelivery}
           />
         )}
       </div>
