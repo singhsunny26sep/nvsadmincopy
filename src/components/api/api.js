@@ -104,6 +104,13 @@ export const vendorsAPI = {
     api.post(`/vendors/${vendorId}/branches`, branchData),
 };
 
+// Service Areas API endpoints
+export const serviceAreasAPI = {
+  getServiceAreas: (vendorId) => api.get(`/vendors/${vendorId}/service-areas`),
+  createServiceArea: (vendorId, areaData) =>
+    api.post(`/vendors/${vendorId}/service-areas`, areaData),
+};
+
 // Users API endpoints
 export const usersAPI = {
   getUsers: (params) => api.get("/users/getAll", { params }),

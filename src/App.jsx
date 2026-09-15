@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import Layout from "./components/layout/Layout";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import "./App.css";
 
 // Lazy imports
@@ -28,6 +29,7 @@ const LocationManagement = lazy(() => import("./pages/location/LocationManagemen
 const Locations = lazy(() => import("./pages/Locations"));
 const SettingsPage = lazy(() => import("./pages/settings/Settings"));
 const WhatsAppBulk = lazy(() => import("./pages/whatsapp/WhatsAppBulk"));
+const ServiceAreas = lazy(() => import("./pages/ServiceAreas"));
 
 function App() {
   return (
@@ -58,6 +60,10 @@ function App() {
                <Route path="/offers" element={<Offer />} />
               <Route path="/notifications" element={<Notification />} />
               <Route path="/whatsapp-bulk" element={<WhatsAppBulk />} />
+              <Route
+                path="/service-areas"
+                element={<ProtectedRoute><ServiceAreas /></ProtectedRoute>}
+              />
             </Route>
 
             {/* 404 Fallback */}

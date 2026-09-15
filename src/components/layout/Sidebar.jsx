@@ -27,6 +27,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       { name: 'Vendor Register', href: '/vendor-register', icon: UserPlus },
       { name: 'Vendor Details', href: '/vendor-details', icon: Store },
       { name: 'Vendor Branches', href: '/vendor-branches', icon: Building2 },
+      { name: 'Service Areas', href: '/service-areas', icon: MapPin },
       // { name: 'Locations', href: '/locations', icon: MapPin },
       { name: 'Location Mgmt', href: '/location-management', icon: MapPin },
     ];
