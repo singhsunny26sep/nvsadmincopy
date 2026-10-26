@@ -44,7 +44,6 @@ const Sidebar = ({ isOpen, onClose }) => {
 
     const roleBasedItems = {
       super_admin: [
-        { name: 'Customers', href: '/users', icon: Users },
         { name: 'Administrators', href: '/administrators', icon: Shield },
         { name: 'Zones', href: '/zones', icon: MapPin },
         { name: 'System Health', href: '/system', icon: Activity },
@@ -52,19 +51,16 @@ const Sidebar = ({ isOpen, onClose }) => {
         { name: 'Settings', href: '/settings', icon: Settings },
       ],
       admin: [
-        { name: 'Customers', href: '/users', icon: Users },
         { name: 'Reports', href: '/reports', icon: FileText },
         { name: 'Settings', href: '/settings', icon: Settings },
       ],
       zone_admin: [
-        { name: 'Customers', href: '/users', icon: Users },
         { name: 'Zone Management', href: '/zone-management', icon: MapPin },
         { name: 'Reports', href: '/reports', icon: FileText },
       ],
        support_admin: [
          { name: 'Products', href: '/products', icon: FileText },
          { name: 'Banner', href: '/banner', icon: FileText },
-
          { name: 'Settings', href: '/settings', icon: Settings },
          { name: 'Notifications', href: '/notifications', icon: FileText },
          { name: 'WhatsApp Bulk', href: '/whatsapp-bulk', icon: MessageSquare },

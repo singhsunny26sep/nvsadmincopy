@@ -96,15 +96,17 @@ const ServiceAreas = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await serviceAreasAPI.getServiceAreas(vendorId);
-        let data = [];
-        if (response.data?.data?.areas && Array.isArray(response.data.data.areas)) {
-          data = response.data.data.areas;
-        } else if (response.data?.data && Array.isArray(response.data.data)) {
-          data = response.data.data;
-        } else if (Array.isArray(response.data)) {
-          data = response.data;
-        }
+         const response = await serviceAreasAPI.getServiceAreas(vendorId);
+         let data = [];
+         if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
+           data = response.data.data.data;
+         } else if (response.data?.data?.areas && Array.isArray(response.data.data.areas)) {
+           data = response.data.data.areas;
+         } else if (response.data?.data && Array.isArray(response.data.data)) {
+           data = response.data.data;
+         } else if (Array.isArray(response.data)) {
+           data = response.data;
+         }
         setServiceAreas(data);
         setSelectedVendorId(vendorId);
       } catch (err) {
