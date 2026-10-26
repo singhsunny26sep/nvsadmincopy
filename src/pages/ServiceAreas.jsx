@@ -109,10 +109,13 @@ const ServiceAreas = () => {
          }
         setServiceAreas(data);
         setSelectedVendorId(vendorId);
-      } catch (err) {
-        console.error("Error fetching service areas:", err);
-        setError("Failed to fetch service areas.");
-        setServiceAreas([]);
+       } catch (err) {
+         console.error("Error fetching service areas:", err);
+         setError(
+           err.response?.data?.message ||
+           "Failed to fetch service areas."
+         );
+         setServiceAreas([]);
       } finally {
         setLoading(false);
       }
@@ -374,7 +377,7 @@ const ServiceAreas = () => {
                   )}
                 </div>
               </div>
-              <div className="flex items-end">
+            <div className="flex items-end">
                 <span className="text-xs text-gray-400">
                   {serviceAreas.length} area
                   {serviceAreas.length !== 1 ? "s" : ""} found
@@ -397,16 +400,18 @@ const ServiceAreas = () => {
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-sm w-full"
               />
             </div>
-            <button
-              onClick={() => {
-                resetForm();
-                setShowForm(true);
-              }}
-              className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-5 py-2.5 rounded-lg hover:from-green-700 hover:to-emerald-700 shadow-md transition-colors text-sm font-medium"
-            >
-              <Plus className="h-4 w-4" />
-              Add Service Area
-            </button>
+            {!isVendor && (
+              <button
+                onClick={() => {
+                  resetForm();
+                  setShowForm(true);
+                }}
+                className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-5 py-2.5 rounded-lg hover:from-green-700 hover:to-emerald-700 shadow-md transition-colors text-sm font-medium"
+              >
+                <Plus className="h-4 w-4" />
+                Add Service Area
+              </button>
+            )}
           </div>
         )}
 

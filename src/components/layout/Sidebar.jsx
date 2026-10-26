@@ -36,6 +36,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       { name: 'Vendor Profile', href: '/vendor-profile', icon: User },
       { name: 'Vendor Settings', href: '/vendor-settings', icon: Settings },
       { name: 'Vendor Branches', href: '/vendor-branches', icon: Building2 },
+      { name: 'Service Areas', href: '/service-areas', icon: MapPin },
       { name: 'Products', href: '/products', icon: FileText },
       { name: 'Categories', href: '/category', icon: Settings },
       { name: 'Sub Categories', href: '/subcategories', icon: Headphones },
